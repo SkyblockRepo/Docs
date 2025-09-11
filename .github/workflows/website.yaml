@@ -21,8 +21,8 @@ jobs:
         uses: actions/cache@v4
         id: node_modules_cache_id
         with:
-          path: site/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
 
       # If the cache didn't exist, run pnpm install
       - name: Install dependencies
@@ -41,8 +41,8 @@ jobs:
       - name: Restore node_modules from cache
         uses: actions/cache@v4
         with:
-          path: site/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Lint
         run: pnpm run lint
@@ -59,8 +59,8 @@ jobs:
       - name: Restore node_modules from cache
         uses: actions/cache@v4
         with:
-          path: site/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Check
         run: pnpm run check
@@ -77,8 +77,8 @@ jobs:
       - name: Restore node_modules from cache
         uses: actions/cache@v4
         with:
-          path: site/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Build
         run: pnpm run build
