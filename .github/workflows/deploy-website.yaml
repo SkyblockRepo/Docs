@@ -27,7 +27,6 @@ jobs:
       # If the cache didn't exist, run pnpm install
       - name: Install dependencies
         if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
-        working-directory: ./site
         run: pnpm install
   build:
     name: Build
@@ -47,14 +46,12 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
 
       - name: Create .env file
-        working-directory: ./site
         run: |
           echo "ORIGIN=https://skyblockrepo.com" > .env
           echo "PUBLIC_HOST_URL=https://skyblockrepo.com" >> .env
           echo "PUBLIC_COMMIT_HASH=${GITHUB_SHA::7}" >> .env
 
       - name: Build
-        working-directory: ./site
         run: pnpm run build
 
       - name: Upload Artifacts

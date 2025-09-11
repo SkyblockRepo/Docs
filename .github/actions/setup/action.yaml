@@ -31,7 +31,6 @@ runs:
 
     - name: Make dummy env for types
       shell: bash
-      working-directory: ./site
       run: |
         echo "ls -a ."
         ls -a .

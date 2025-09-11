@@ -27,7 +27,6 @@ jobs:
       # If the cache didn't exist, run pnpm install
       - name: Install dependencies
         if: steps.node_modules_cache_id.outputs.cache-hit != 'true'
-        working-directory: ./site
         run: pnpm install
   lint:
     name: Lint
@@ -46,7 +45,6 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
 
       - name: Lint
-        working-directory: ./site
         run: pnpm run lint
   check:
     name: Svelte Check
@@ -65,7 +63,6 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
 
       - name: Check
-        working-directory: ./site
         run: pnpm run check
   build:
     name: Build
@@ -84,5 +81,4 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('site/pnpm-lock.yaml') }}
 
       - name: Build
-        working-directory: ./site
         run: pnpm run build
