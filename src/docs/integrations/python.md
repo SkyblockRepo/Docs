@@ -35,7 +35,7 @@ Attempting to download the repo while the `SkyblockRepo` directory already exist
 
 ```python
 try:
-  await download_repo()
+  download_repo()
 except e:
   print(f'Failed to download repo: {e}')
 ```

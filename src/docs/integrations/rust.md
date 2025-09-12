@@ -34,13 +34,13 @@ Attempting to download the repo while the `SkyblockRepo` directory already exist
 `delete_zip` param determines whether or not to delete the zip download and only keep the extracted files.
 
 ```rust
-download_repo(true).await?;
+download_repo(true)?;
 ```
 
 `delete_repo` deletes the `SkyblockRepo` directory and `SkyblockRepo-main.zip` if they exist.
 
 ```rust
-delete_repo().await?;
+delete_repo()?;
 ```
 
 ### Using the library to interop with the repo
