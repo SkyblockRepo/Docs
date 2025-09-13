@@ -13,6 +13,8 @@ published: true
 
 A [PyPi package](https://pypi.org/manage/project/skyblock-repo) is available to use to easily interact with the raw data from the [Skyblock Repo]
 
+If you need extra help, make an issue on the [GitHub repository].
+
 ## Installation
 
 You can add the library to your project with:
@@ -71,3 +73,4 @@ pet = repo.get_pet_by_id("PHOENIX");
 ```
 
 [Skyblock Repo]: https://github.com/SkyblockRepo/Repo
+[Github repository]: https://github.com/SkyblockRepo/RepoRS
