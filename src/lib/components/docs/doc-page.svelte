@@ -54,12 +54,12 @@
 		</div>
 	</div>
 	<div class="hidden w-full max-w-64 text-sm xl:block">
-		<div class="fixed top-24 -mt-10 h-[calc(100vh-32rem)] py-8">
-			<ScrollArea class="h-full">
-				{#key page.url.pathname + metadata.title}
-					<TableOfContents />
-				{/key}
-			</ScrollArea>
-		</div>
+		{#if metadata.toc.length}
+			<div class="fixed top-24 -mt-10 h-[calc(100vh-32rem)] py-8">
+				<ScrollArea class="h-full">
+					<TableOfContents toc={{ items: metadata.toc }} />
+				</ScrollArea>
+			</div>
+		{/if}
 	</div>
 </main>

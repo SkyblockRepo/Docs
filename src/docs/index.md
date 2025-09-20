@@ -2,51 +2,25 @@
 title: Skyblock Repo
 date: 2025-08-21
 category: main
+order: 1
 author: Kaeso
-description: Example doc page.
+description: Skyblock Repo Documentation
 tags:
-  - announcement
-  - example
-  - cool
-published: false
+  - introduction
+published: true
 ---
 
-Test
+Welcome!
 
-## Text formatting
+This project exists for developers to get Hypixel data in an easier way.
 
-Use markdown to format your text. You can use **bold**, _italic_, and `code` formatting.
-Also \`\`\`code blocks\`\`\` are supported. You can put a `\` to escape special characters.
+## Data Sources
 
-```ts
-// Code blocks can be used for longer code snippets.
-export const siteConfig = defineSiteConfig({
-	name: 'Skyblock Repo',
-	url: 'https://skyblockrepo.com',
-	description: 'Skyblock Repo is a comprehensive resource for Skyblock developers!',
-	author: 'Skyblock Repo',
-	keywords: ['skyblock', 'skyblockrepo', 'repository', 'development', 'hypixel']
-});
-```
+- **Hypixel API** \
+  Data is automatically pulled from Hypixel resource endpoints! However, the data provided here is not comprehensive, so the other sources help with gaps.
 
-## Lists
+- **Hypixel Wiki** \
+  Data is periodically loaded in from the official [Hypixel Wiki](https://wiki.hypixel.net). This is where the vast majority of value comes from, as Hypixel typically automatically updates a lot of properties on the wiki that just aren't available anywhere else.
 
-You can create lists using markdown.
-
-### Unordered
-
-- Unordered lists
-- Are easy to create
-  - You can also nest them
-- Like this
-
-### Ordered
-
-1. Ordered lists
-2. Are also easy to create
-   1. You can also nest them
-3. Like this
-
-## Links
-
-You can create links to other pages or websites. [Here is an example link](https://example.com).
+- **Manual Overrides / Scripts** \
+  Any missing or misc data is loaded through manual overrides and scripts made in the [RepoOverrides](https://github.com/SkyblockRepo/RepoOverrides) github repository. If you want to contribute to the repo this might be where you start.

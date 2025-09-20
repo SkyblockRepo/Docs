@@ -42,6 +42,7 @@ public static IServiceCollection AddSkyblockRepo(this IServiceCollection service
 ```
 
 ### Add the repo from remote source
+
 By default, the repo is automatically downloaded from https://github.com/SkyblockRepo/Repo on initialization.
 If an update is found, it'll automatically be downloaded and extracted.
 
@@ -70,7 +71,7 @@ Background service example for polling updates. You can implement this however y
 public class RepoUpdateService(ISkyblockRepoClient repoClient) : BackgroundService
 {
 	private readonly TimeSpan _interval = TimeSpan.FromMinutes(10);
-	
+
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		while (!stoppingToken.IsCancellationRequested)
@@ -88,6 +89,7 @@ builder.Services.AddHostedService<RepoUpdateService>();
 ```
 
 ### Add a local copy of the repo
+
 You can use a local copy for running tests or managing the updates/version outside of your project.
 
 Specifying a local path disables all automatic polling/updates.
@@ -104,6 +106,7 @@ builder.Services.AddSkyblockRepo(config => {
 ## Usage
 
 After setting up the repo, you'll need to initialize it.
+
 ```csharp
 // Example init in Program.cs
 using (var scope = app.Services.CreateScope())
@@ -118,13 +121,14 @@ await SkyblockRepoClient.Instance.InitializeAsync();
 Then you can inject `ISkyblockRepoClient` and use the methods on it!
 
 ```csharp
-public class MyService(ISkyblockRepoClient repo) 
+public class MyService(ISkyblockRepoClient repo)
 {
   public SkyblockItemData? FindItem(string name) => repo.FindItem(name);
 }
 ```
 
 You can also access the repo data in a static context like this:
+
 ```csharp
 var item = SkyblockRepoClient.Instance.FindItem(itemName);
 ```
@@ -133,7 +137,7 @@ var item = SkyblockRepoClient.Instance.FindItem(itemName);
 
 Using the SkyblockRepo outside of dependency injection isn't really supported at this time.
 
-You *can* get it working like this though:
+You _can_ get it working like this though:
 
 ```csharp
 // You need an ILogger instance, this is a substitue using NSubstitue

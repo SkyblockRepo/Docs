@@ -1,108 +1,128 @@
-<script lang="ts">
-	import type { TableOfContents, TableOfContentsItem } from '$lib/index.js';
-	import { onMount } from 'svelte';
-	import { SvelteSet } from 'svelte/reactivity';
-	import { writable } from 'svelte/store';
-	import Tree from './toc-tree.svelte';
+<script lang="ts" module>
+	function useActiveItem(getItemIds: () => string[]) {
+		let activeId = $state<string | null>(null);
+		const itemIds = $derived(getItemIds().map((id) => id.replace('#', '')));
 
-	let filteredHeadingsList = $state<TableOfContents>();
-
-	function getHeadingsWithHierarchy(divId: string) {
-		const div = document.getElementById(divId);
-
-		if (!div) {
-			return { items: [] };
-		}
-
-		const headings: HTMLHeadingElement[] = Array.from(div.querySelectorAll('h2, h3'));
-		const hierarchy: TableOfContents = { items: [] };
-		let currentLevel: TableOfContentsItem | undefined = undefined;
-
-		const newIdSet: Set<string> = new SvelteSet();
-		let count = 1;
-		for (const heading of headings) {
-			const level = Number.parseInt(heading.tagName.charAt(1));
-			if (!heading.id) {
-				let newId = heading.innerText
-					.replaceAll(/[^a-z0-9 ]/gi, '')
-					.replaceAll(' ', '-')
-					.toLowerCase();
-				if (newIdSet.has(newId)) {
-					newId = `${newId}-${count}`;
-					count++;
-				}
-				newIdSet.add(newId);
-				heading.id = `${newId}`;
-			}
-
-			const item: TableOfContentsItem = {
-				title: heading.textContent || '',
-				url: `#${heading.id}`,
-				items: []
-			};
-
-			if (level === 2) {
-				hierarchy.items.push(item);
-				currentLevel = item;
-			} else if (level === 3 && currentLevel?.items && !heading.hasAttribute('data-toc-ignore')) {
-				currentLevel.items.push(item);
-			}
-		}
-
-		filteredHeadingsList = hierarchy;
-	}
-
-	const activeItem = writable<string | undefined>(undefined);
-
-	function useActiveItem(itemIds: string[]) {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
+		$effect(() => {
+			const observer = new IntersectionObserver((entries) => {
+				for (const entry of entries) {
 					if (entry.isIntersecting) {
-						$activeItem = entry.target.id;
+						activeId = entry.target.id;
 					}
-				});
-			},
-			{ rootMargin: `0% 0% -10% 0%` }
-		);
+				}
+			});
 
-		const observeElement = (id: string) => {
-			const element = document.getElementById(id);
-			if (element) {
-				observer.observe(element);
-			}
-		};
-
-		itemIds?.forEach(observeElement);
-
-		return () => {
-			const unobserveElement = (id: string) => {
+			for (const id of itemIds ?? []) {
 				const element = document.getElementById(id);
 				if (element) {
-					observer.unobserve(element);
+					observer.observe(element);
+				}
+			}
+
+			return () => {
+				for (const id of itemIds ?? []) {
+					const element = document.getElementById(id);
+					if (element) {
+						observer.unobserve(element);
+					}
 				}
 			};
+		});
 
-			itemIds?.forEach(unobserveElement);
+		return {
+			get current() {
+				return activeId;
+			}
 		};
 	}
 
-	// Lifecycle
-	onMount(() => {
-		getHeadingsWithHierarchy('markdown');
-		const allItemIds: string[] = [];
-		filteredHeadingsList?.items.forEach((item) => {
-			allItemIds.push(item.url.replace('#', ''));
-			if (!item.items) return;
-			item.items.forEach((subItem) => {
-				allItemIds.push(subItem.url.replace('#', ''));
+	export type TocItem = {
+		title: string;
+		url: string;
+		items?: TocItem[];
+	};
+
+	export type TableOfContents = {
+		items?: TocItem[];
+	};
+
+	function flattenToc(
+		items: TocItem[],
+		depth = 0
+	): Array<{ title: string; url: string; depth: number }> {
+		const result: Array<{ title: string; url: string; depth: number }> = [];
+
+		for (const item of items) {
+			result.push({
+				title: item.title,
+				url: item.url,
+				depth
 			});
-		});
-		return useActiveItem(allItemIds);
-	});
+
+			if (item.items && item.items.length > 0) {
+				result.push(...flattenToc(item.items, depth + 1));
+			}
+		}
+
+		return result;
+	}
 </script>
 
-<div class="space-y-2">
-	<p class="inline-flex font-medium">On This Page</p>
-	<Tree tree={filteredHeadingsList} activeItem={$activeItem} />
-</div>
+<script lang="ts">
+	import * as DropdownMenu from '$ui/dropdown-menu/index.js';
+	import { Button } from '$ui/button/index.js';
+	import { cn } from '$lib/utils.js';
+	import MenuIcon from '@lucide/svelte/icons/menu';
+
+	let {
+		toc,
+		variant = 'list',
+		class: className
+	}: { toc: TableOfContents; variant?: 'dropdown' | 'list'; class?: string } = $props();
+
+	const flattenedToc = $derived(flattenToc(toc.items ?? []));
+	const itemIds = $derived(flattenedToc.map((item) => item.url));
+	const activeHeading = useActiveItem(() => itemIds);
+	let open = $state(false);
+</script>
+
+{#if flattenedToc.length}
+	{#if variant === 'dropdown'}
+		<DropdownMenu.Root bind:open>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Button {...props} variant="outline" size="sm" class={cn('h-8 md:h-7', className)}>
+						<MenuIcon /> On This Page
+					</Button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="start" class="no-scrollbar max-h-[70svh]">
+				{#each flattenedToc as item (item.url)}
+					<DropdownMenu.Item
+						onSelect={() => (open = false)}
+						data-depth={item.depth}
+						class="data-[depth=1]:pl-6 data-[depth=2]:pl-8"
+					>
+						{#snippet child({ props })}
+							<a href={item.url} {...props}>{item.title}</a>
+						{/snippet}
+					</DropdownMenu.Item>
+				{/each}
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	{:else}
+		<div class={cn('flex flex-col gap-2 p-4 pt-0 text-sm', className)}>
+			<p class="sticky top-0 h-6 bg-background text-xs text-muted-foreground">On This Page</p>
+			{#each flattenedToc as item (item.url)}
+				<a
+					href={item.url}
+					class="text-[0.8rem] text-muted-foreground no-underline transition-colors hover:text-foreground data-[active=true]:text-foreground data-[depth=1]:pl-4 data-[depth=2]:pl-6"
+					data-active={item.url === `#${activeHeading.current}`}
+					data-depth={item.depth}
+				>
+					{item.title}
+				</a>
+			{/each}
+		</div>
+	{/if}
+{/if}

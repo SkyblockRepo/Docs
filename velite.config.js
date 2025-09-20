@@ -13,7 +13,8 @@ const docSchema = s
 		date: s.string().default(''),
 		navLabel: s.string().optional(),
 		published: s.boolean().default(false),
-		component: s.boolean().default(false)
+		component: s.boolean().default(false),
+		toc: s.toc()
 	})
 	.transform((data) => {
 		return {

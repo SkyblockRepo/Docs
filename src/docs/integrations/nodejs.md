@@ -5,10 +5,13 @@ category: integrations
 author: Kaeso
 description: How to use Skyblock Repo in Node.js projects
 tags:
-  - announcement
-  - example
-  - cool
-published: false
+  - integration
+  - tutorial
+  - Node.js
+  - JavaScript
+published: true
 ---
 
-How to use
+The Node.js Skyblock Repo package isn't available yet!
+
+Check back for updates!
