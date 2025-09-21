@@ -61,7 +61,7 @@ builder.Services.AddSkyblockRepo(config => {
 
 **You will need to implement update polling yourself!**
 
-This is as simple as calling `ISkyblockRepo.CheckForUpdatesAsync()` every 10 minutes / 30 minutes / etc.
+This is as simple as calling `ISkyblockRepoClient.CheckForUpdatesAsync()` every 10 minutes / 30 minutes / etc.
 
 ### Example polling implementation
 
@@ -111,7 +111,7 @@ After setting up the repo, you'll need to initialize it.
 // Example init in Program.cs
 using (var scope = app.Services.CreateScope())
 {
-  var repo = scope.ServiceProvider.GetRequiredService<ISkyblockRepoManager>();
+  var repo = scope.ServiceProvider.GetRequiredService<ISkyblockRepoClient>();
   await repo.InitializeAsync();
 }
 // Or statically (though Instance won't be initialized until the service host is built)
