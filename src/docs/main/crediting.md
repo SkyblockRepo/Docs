@@ -12,6 +12,10 @@ published: true
 
 Please link back to https://skyblockrepo.com where you can! This is only requirement.
 
+## NotEnoughUpdates Repo
+
+Some data is loaded from https://github.com/NotEnoughUpdates/NotEnoughUpdates-REPO. Please credit them also!
+
 ## Hypixel Policies
 
 Please note most of this data comes directly from Hypixel. You must respect their policies on proper use of Hypixel materials.
