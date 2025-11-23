@@ -12,9 +12,7 @@ tags:
 published: true
 ---
 
-# RepoJS
-
-RepoJS is a TypeScript/JavaScript client for interacting with the Skyblock Repo data. It allows you to easily load item data, search for items, and match items from your application to the repo data.
+`skyblockrepo` is a TypeScript/JavaScript client for interacting with the Skyblock Repo data. It allows you to easily load item data, search for items, and match items from your application to the repo data.
 
 ## Installation
 
