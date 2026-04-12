@@ -26,42 +26,55 @@ dotnet add package SkyblockRepo
 
 ## Setup
 
-Right now, the library is in a basic prelease state.
+Right now, the library is in a basic prerelease state.
 
-It can be registered into a dependency injection environment as shown below, all services are Singleton services.
-
-Here's how it's set up internally:
-
-```csharp
-public static IServiceCollection AddSkyblockRepo(this IServiceCollection services, SkyblockRepoConfiguration options) {
-  services.AddSingleton(options);
-  services.AddSingleton<ISkyblockRepoUpdater, SkyblockRepoUpdater>();
-  services.AddSingleton<ISkyblockRepoClient, SkyblockRepoClient>();
-  return services;
-}
-```
+It can be registered into a dependency injection environment with `AddSkyblockRepo(...)`. All services are registered as singletons.
 
 ### Add the repo from remote source
 
 By default, the repo is automatically downloaded from https://github.com/SkyblockRepo/Repo on initialization.
-If an update is found, it'll automatically be downloaded and extracted.
+If an update is found, it'll automatically be downloaded and stored using the configured storage mode.
 
 ```csharp
 using SkyblockRepo;
 
-builder.Services.AddSkyblockRepo(config => {
+builder.Services.AddSkyblockRepo(config =>
+{
   // Path for where you want the repo to be extracted to, defaults to an OS-specific local app data folder
   config.FileStoragePath = /**/;
 
   // You can change this to a fork if needed, defaults to the main repo
-  // Also change config.SkyblockRepoApiEndpoint if you change this
-  config.SkyblockRepoUrl = "https://github.com/SkyblockRepo/Repo";
+  config.SkyblockRepo.Url = "https://github.com/SkyblockRepo/Repo";
+  config.SkyblockRepo.ApiEndpoint = "https://api.github.com/repos/SkyblockRepo/Repo/commits/main";
 });
 ```
 
 **You will need to implement update polling yourself!**
 
 This is as simple as calling `ISkyblockRepoClient.CheckForUpdatesAsync()` every 10 minutes / 30 minutes / etc.
+
+### Use zip-backed storage for faster reloads
+
+The package now supports storing each downloaded repo as a single zip file on disk and inflating it in memory during reload. This avoids extracting thousands of files and is usually the faster option.
+
+`ExtractedDirectory` remains the default for compatibility. To enable the new behavior, set `StorageMode` to `RepoStorageMode.ZipArchive`:
+
+```csharp
+using SkyblockRepo;
+
+builder.Services.AddSkyblockRepo(config =>
+{
+  config.FileStoragePath = /**/;
+  config.SkyblockRepo.StorageMode = RepoStorageMode.ZipArchive;
+
+  // Optional, defaults to "<repo name>.zip"
+  config.SkyblockRepo.ZipFileName = "skyblockrepo.zip";
+});
+```
+
+In zip mode, downloaded data is stored inside the repo folder as `skyblockrepo.zip` for the main repo and `neu.zip` for the NEU repo unless you override `ZipFileName`.
+
+If you want to switch between extracted and zip-backed storage, you only need to change the `StorageMode` flag. The repo folder path stays the same.
 
 ### Example polling implementation
 
@@ -97,9 +110,27 @@ Specifying a local path disables all automatic polling/updates.
 ```csharp
 using SkyblockRepo;
 
-builder.Services.AddSkyblockRepo(config => {
+builder.Services.AddSkyblockRepo(config =>
+{
   // An example with the repo being cloned in a folder next to your project
-  config.LocalRepoPath = Path.Combine(SkyblockRepoUtils.GetSolutionPath, "..", "SkyblockRepo");
+  config.SkyblockRepo.LocalPath = Path.Combine(SkyblockRepoUtils.GetSolutionPath(), "..", "SkyblockRepo");
+});
+```
+
+`LocalPath` should always point to the repo folder, not directly to a zip file.
+
+If you are using `RepoStorageMode.ZipArchive`, the package looks for `<LocalPath>/<ZipFileName>` inside that folder:
+
+```csharp
+using SkyblockRepo;
+
+builder.Services.AddSkyblockRepo(config =>
+{
+  config.SkyblockRepo.LocalPath = Path.Combine(SkyblockRepoUtils.GetSolutionPath(), "..", "SkyblockRepo");
+  config.SkyblockRepo.StorageMode = RepoStorageMode.ZipArchive;
+
+  // Optional, defaults to "skyblockrepo.zip"
+  config.SkyblockRepo.ZipFileName = "skyblockrepo.zip";
 });
 ```
 
@@ -140,15 +171,15 @@ Using the SkyblockRepo outside of dependency injection isn't really supported at
 You _can_ get it working like this though:
 
 ```csharp
-// You need an ILogger instance, this is a substitue using NSubstitue
+// You need an ILogger instance, this is a substitute using NSubstitute
 var logger = Substitute.For<ILogger<SkyblockRepoUpdater>>();
 
 var config = new SkyblockRepoConfiguration
 {
   /* Your config options */
 };
-var updater = new SkyblockRepoUpdater(config, logger);
-var repo = new SkyblockRepoClient(updater);
+var updater = new SkyblockRepoUpdater(config, logger: logger);
+var repo = new SkyblockRepoClient(updater, config);
 
 await repo.InitializeAsync();
 
